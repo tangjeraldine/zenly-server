@@ -20,15 +20,26 @@ app.get("/", (req, res) => {
   res.json({ OnStart: "Welcome to Zenly API" });
 });
 
-// app.get("/allicecream", async (req, res) => {
-//   try {
-//     const allIceCreams = await pool.query("SELECT * FROM ice_creams");
-//     res.status(200).json(allIceCreams.rows);
-//     pool.end();
-//   } catch (error) {
-//     res.status(500).send(error);
-//   }
-// });
+app.get("/allicecream", async (req, res) => {
+  try {
+    const allIceCreams = await pool.query("SELECT * FROM ice_creams");
+    res.status(200).json(allIceCreams.rows);
+    pool.end();
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+app.get("/allgoods", async (req, res) => {
+  try {
+    const allGoods = await pool.query(`SELECT * FROM "Goods"`);
+    // res.send({ msg: "Success!" });
+    res.status(200).json(allGoods.rows);
+    // pool.end();
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`App running on port ${PORT}.`);

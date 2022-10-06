@@ -3,20 +3,6 @@
  * @returns { Promise<void> }
  */
 
-// const createTablesSafely = (knex) => (tables) => {
-//   const createTables = tables.map(({ name, schema }) => {
-//     return knex.schema.createTable(name, schema);
-//   });
-
-//   return Promise.all(createTables).catch((e) => {
-//     const dropTables = tables.map(({ name }) => {
-//       return knex.schema.dropTableIfExists(name);
-//     });
-
-//     return Promise.all(dropTables).then(() => Promise.reject(e));
-//   });
-// };
-
 exports.up = (knex, Promise) => {
   return knex.schema
     .createTable("Users", function (tbl) {
@@ -24,22 +10,12 @@ exports.up = (knex, Promise) => {
       tbl.increments("id").checkPositive().notNullable();
       tbl.string("full_name", 40).notNullable();
       tbl.unique(["email"]);
-      tbl
-        .string("email", 40)
-        .checkRegex("^([a-zA-Z0-9_-.]+)@([a-zA-Z0-9_-.]+).([a-zA-Z]{2,5})$")
-        .notNullable();
-      tbl
-        .string("password")
-        .checkRegex(
-          "^(?=.*[a-z])(?=.*[A-Z])(?=.*d)(?=.*[@$!%*?&])[A-Za-zd@$!%*?&]{8,18}$"
-        )
-        .notNullable();
-      tbl
-        .string("phone_no")
-        .checkRegex("[0-9]{8}")
-        .checkLength("<=", 15)
-        .notNullable();
-      tbl.integer("security_lvl").defaultTo("1");
+      tbl.string("email", 40).notNullable();
+      tbl.string("password").notNullable();
+      tbl.string("phone_no").checkRegex("[0-9]{8,15}").notNullable();
+      tbl.string("birthdate", 25).notNullable();
+      tbl.enu("gender", ["Male", "Female"]).notNullable();
+      tbl.integer("security_lvl").defaultTo(1);
       tbl.timestamp("created_at").defaultTo(knex.fn.now());
     })
     .createTable("Goods", function (tbl) {
