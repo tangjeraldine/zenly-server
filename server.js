@@ -35,7 +35,8 @@ app.get("/allgoods", async (req, res) => {
     const allGoods = await pool.query(`SELECT * FROM "Goods"`);
     // res.send({ msg: "Success!" });
     res.status(200).json(allGoods.rows);
-    // pool.end();
+    console.log(allGoods.rows);
+    pool.end();
   } catch (error) {
     res.status(500).send(error);
   }
