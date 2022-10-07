@@ -98,6 +98,13 @@ exports.up = (knex, Promise) => {
         .onUpdate("CASCADE")
         .onDelete("CASCADE")
         .notNullable();
+      tbl
+        .integer("Purchases_id")
+        .unsigned()
+        .references("Purchases.id")
+        .onUpdate("CASCADE")
+        .onDelete("CASCADE")
+        .notNullable();
       tbl.string("date_time").notNullable();
       tbl.text("visit_purpose", 300).notNullable();
       tbl

@@ -7,9 +7,9 @@ exports.seed = async function (knex) {
   await knex("Appointments").del();
   await knex("Appointments").insert([
     {
-      id: 1,
       Users_id: 2,
       Goods_id: 3,
+      Purchases_id: 2,
       date_time: "2022-10-15T15:30:00",
       visit_purpose: "Sore neck after badminton.",
       appt_status: "Session Confirmed",

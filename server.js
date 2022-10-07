@@ -16,6 +16,17 @@ app.use(cors());
 app.use(express.json());
 // app.use("/route", XXController);
 
+//* Middleware for validation
+const validation = (schema) => async (req, res, next) => {
+  const body = req.body;
+  try {
+    await schema.validate(body);
+    next();
+  } catch (error) {
+    res.status(400).json(error);
+  }
+};
+
 app.get("/", (req, res) => {
   res.json({ OnStart: "Welcome to Zenly API" });
 });
