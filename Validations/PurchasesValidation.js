@@ -15,23 +15,20 @@ const PurchasesValidation = yup.object({
     .max(5, "Quantity cannot be higher than 5."),
   transaction_no: yup
     .string()
-    .matches(
-      /^(?!.*\s)(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[~`!@#$%^&*()--+={}\[\]|\\:;"'<>,.?/_₹]).{10,11}$/,
-      {
-        excludeEmptyString: true,
-      }
-    )
+    .matches(/^[A-Za-z0-9_-]*$/, {
+      excludeEmptyString: true,
+    })
     .required("Transaction number is required."),
   order_status: yup
     .string()
-    .required("Exactly one status is required.")
     .matches(
       /(Pending Confirmation|Session Booked|Order Completed|Order Cancelled)/,
       {
         message: "Please select one status.",
         excludeEmptyString: true,
       }
-    ),
+    )
+    .default("Pending Confirmation"),
   grand_total: yup
     .number()
     .typeError("Total must be a number")

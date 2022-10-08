@@ -5,16 +5,27 @@ const cors = require("cors");
 const morgan = require("morgan");
 //* Connecting Port
 const PORT = process.env.PORT ?? 3000;
+const UsersController = require("./Controllers/UsersController");
+const LoginRegisterController = require("./Controllers/LoginRegisterController");
 //* Connecting Database using pg
-const { Pool, Client } = require("pg");
+const Pool = require("pg").Pool;
 const connectionString = process.env.DB_URL;
 const pool = new Pool({
   connectionString,
 });
+// const Pool = require("pg").Pool;
+// const pool = new Pool({
+//   user: "postgres",
+//   host: "localhost",
+//   database: "ice_creams",
+//   password: "Th$Beebies2809",
+//   port: 5432,
+// });
 //* Middleware
 app.use(cors());
 app.use(express.json());
-// app.use("/route", XXController);
+app.use("/user", UsersController);
+app.use("/sign", LoginRegisterController);
 
 //* Middleware for validation
 const validation = (schema) => async (req, res, next) => {
@@ -41,12 +52,10 @@ app.get("/allicecream", async (req, res) => {
   }
 });
 
-app.get("/allgoods", async (req, res) => {
+app.get("/all", async (req, res) => {
   try {
     const allGoods = await pool.query(`SELECT * FROM "Goods"`);
-    // res.send({ msg: "Success!" });
     res.status(200).json(allGoods.rows);
-    console.log(allGoods.rows);
     pool.end();
   } catch (error) {
     res.status(500).send(error);
