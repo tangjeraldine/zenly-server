@@ -137,4 +137,18 @@ router.post("/purchases", validation(PurchasesValidation), async (req, res) => {
   }
 });
 
+router.get("/mypurchases/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const getMyPurchases = await pool.query(
+      `SELECT * FROM "Purchases" WHERE "Users_id" = $1`,
+      [id]
+    );
+    res.status(200).json(getMyPurchases.rows);
+    pool.end();
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
 module.exports = router;
