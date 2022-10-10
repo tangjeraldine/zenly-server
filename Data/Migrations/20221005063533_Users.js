@@ -16,6 +16,7 @@ exports.up = (knex, Promise) => {
       tbl.string("birthdate", 25).notNullable();
       tbl.enu("gender", ["Male", "Female"]).notNullable();
       tbl.integer("security_lvl").defaultTo(1);
+
       tbl.timestamp("created_at").defaultTo(knex.fn.now());
     })
     .createTable("Goods", function (tbl) {

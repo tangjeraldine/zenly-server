@@ -24,7 +24,6 @@ router.get("/all", async (req, res) => {
   try {
     const allGoods = await pool.query(`SELECT * FROM "Goods"`);
     res.status(200).json(allGoods.rows);
-    pool.end();
   } catch (error) {
     res.status(500).send(error);
   }
@@ -38,7 +37,6 @@ router.get("/current/:id", async (req, res) => {
       [id]
     );
     res.status(200).json(currentgood.rows[0]);
-    pool.end();
   } catch (error) {
     res.status(500).send(error);
   }
@@ -50,7 +48,6 @@ router.get("/allproducts", async (req, res) => {
       `SELECT * FROM "Goods" WHERE goods_type = 'Product'`
     );
     res.status(200).json(allProducts.rows);
-    pool.end();
   } catch (error) {
     res.status(500).send(error);
   }
@@ -62,7 +59,6 @@ router.get("/allservices", async (req, res) => {
       `SELECT * FROM "Goods" WHERE goods_type = 'Service'`
     );
     res.status(200).json(allServices.rows);
-    pool.end();
   } catch (error) {
     res.status(500).send(error);
   }
@@ -71,26 +67,45 @@ router.get("/allservices", async (req, res) => {
 router.get("/allcartitems/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    //? SOMETHING ODD ABOUT THIS. YOU NEED TO GET THE ROW IN CART WHERE THE USER_ID IS <$1>, THEN, USE THE GOODS_ID IN THAT ROW, TO SELECT TITLE PRICE ETC FROM 'GOODS' --> USE SUB QUERY? OR JUNCTION TABLE?
     const allCartItems = await pool.query(
-      `SELECT title, price, goods_type FROM "Goods" WHERE "Goods".id = $1`,
+      `SELECT title, image_url, price, quantity, "Goods_id", "Cart".id FROM "Cart" INNER JOIN "Goods" ON "Cart"."Goods_id" = "Goods"."id" WHERE "Users_id" = $1 AND checked_out = false`,
       [id]
     );
     res.status(200).json(allCartItems.rows);
-    pool.end();
   } catch (error) {
     res.status(500).send(error);
   }
 });
 
-router.post("/addtocart", validation(CartValidation), async (req, res) => {
+router.post("/addtocart/", validation(CartValidation), async (req, res) => {
   const { quantity, User_id, Goods_id } = req.body;
   try {
     const addToCart = await pool.query(
       `INSERT INTO "Cart"("id", quantity, "Users_id", "Goods_id") VALUES(nextval('cart_id_seq'), $1, $2, $3) RETURNING *`,
       [quantity, User_id, Goods_id]
     );
-    res.status(200).json(addToCart);
+    const findExistingItem = await pool.query(
+      `SELECT * FROM "Cart" WHERE "id" = $1 AND "Goods_id" = $2 AND checked_out = false`,
+      [User_id, Goods_id]
+    );
+    if (findExistingItem.length !== 0) {
+      res.status(401).json({ msg: "Item already exists in cart" });
+    } else {
+      res.status(200).json({ msg: "Added to cart" });
+    }
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+router.put("/edititemquantity", async (req, res) => {
+  const { quantity, User_id, Goods_id, cartItem_id } = req.body;
+  try {
+    const editItemQuantity = await pool.query(
+      `UPDATE "Cart" SET quantity = $1 WHERE id = $2`,
+      [quantity, cartItem_id]
+    );
+    res.status(200).json({ msg: "Item quantity changed." });
   } catch (error) {
     res.status(500).send(error);
   }
@@ -99,21 +114,13 @@ router.post("/addtocart", validation(CartValidation), async (req, res) => {
 router.delete("/removecartitem/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const findThisCartItem = await pool.query(
-      `SELECT * FROM "Cart" WHERE "Cart".id = $1`,
+    const deleteThisCartItem = await pool.query(
+      `DELETE FROM "Cart" WHERE "id" = $1 AND checked_out = false`,
       [id]
     );
-    const thisItem = findThisCartItem.rows[0];
-    if (thisItem.checked_out === false) {
-      const deleteThisCartItem = await pool.query(
-        `DELETE FROM "Cart" WHERE "Cart".id = $1 AND checked_out = false`,
-        [id]
-      );
-      res.status(200).json({ msg: "Item deleted." });
-      pool.end();
-    } else res.status(400).json({ msg: "Item is checked out. Not deleted." });
+    res.status(200).json({ msg: "Item deleted." });
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).send({ msg: "Item not deleted" });
   }
 });
 
@@ -145,7 +152,6 @@ router.get("/mypurchases/:id", async (req, res) => {
       [id]
     );
     res.status(200).json(getMyPurchases.rows);
-    pool.end();
   } catch (error) {
     res.status(500).send(error);
   }

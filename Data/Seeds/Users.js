@@ -25,6 +25,7 @@ exports.seed = async function (knex) {
       phone_no: "80019002",
       birthdate: "15-09-1980",
       gender: "Male",
+
       security_lvl: 1,
     },
     {

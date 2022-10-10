@@ -35,7 +35,7 @@ router.post("/login", validation(LoginValidation), async (req, res) => {
     res.status(401).send({ error: "No user found." });
   } else if (bcrypt.compareSync(password, currentUser.password)) {
     const payload = { currentUser };
-    const token = jwt.sign(payload, SECRET, { expiresIn: "1200s" });
+    const token = jwt.sign(payload, SECRET);
     res.status(200).send({ msg: "Login successful!", token });
   } else {
     res.status(401).send({ error: "Login failed." });
