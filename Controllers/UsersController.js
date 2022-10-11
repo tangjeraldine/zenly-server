@@ -84,17 +84,14 @@ router.post("/addtocart/", validation(CartValidation), async (req, res) => {
       `SELECT * FROM "Cart" WHERE "id" = $1 AND "Goods_id" = $2 AND checked_out = false`,
       [User_id, Goods_id]
     );
-    if (findExistingItem.length !== 0) {
-      res.status(401).json(findExistingItem);
-      // {
-      //   msg: "Item already exists in cart";
-      // }
+    if (findExistingItem.rows.length !== 0) {
+      res.status(401).json(findExistingItem.rows);
     } else {
       const addToCart = await pool.query(
         `INSERT INTO "Cart"("id", quantity, "Users_id", "Goods_id") VALUES(nextval('cart_id_seq'), $1, $2, $3) RETURNING *`,
         [quantity, User_id, Goods_id]
       );
-      res.status(200).json({ msg: "Added to cart" });
+      res.status(200).json(addToCart);
     }
   } catch (error) {
     res.status(500).send(error);
