@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const RegisterValidation = require("../Validations/RegisterValidation");
 const LoginValidation = require("../Validations/LoginValidation");
+const EditAccountDetsValidation = require("../Validations/EditAccountDetsValidation");
 //* Connecting Database using pg
 const Pool = require("pg").Pool;
 const connectionString = process.env.DB_URL;
@@ -82,13 +83,38 @@ router.get("/currentuser/:id", async (req, res) => {
 //router for editing profile details
 router.put(
   "/edituserdetails/:id",
-  validation(RegisterValidation),
+  validation(EditAccountDetsValidation),
   async (req, res) => {
     const { id } = req.params;
     const { full_name, email, password, phone_no, birthdate, gender } =
       req.body;
-    //? --------> continue with conditional
+    if (password === "") {
+      const editAllButPw = await pool.query(
+        `UPDATE "Users" SET full_name = $1, email = $2, phone_no = $3, birthdate = $4, gender = $5 WHERE id = $6 RETURNING *`,
+        [full_name, email, phone_no, birthdate, gender, id]
+      );
+      res.status(200).json(editAllButPw);
+    } else {
+      const hash = bcrypt.hashSync(password, 10);
+      const editAllDets = await pool.query(
+        `UPDATE "Users" SET full_name = $1, email = $2, phone_no = $3, password = $4, birthdate = $5, gender = $6 WHERE id = $7 RETURNING *`,
+        [full_name, email, hash, phone_no, birthdate, gender, id]
+      );
+      res.status(500).send({ msg: "Failed to update user details." });
+    }
   }
 );
+
+router.delete("/deletemyaccount/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const deleteMe = await pool.query(`DELETE FROM "Users" WHERE "id" = $1`, [
+      id,
+    ]);
+    res.status(200).json({ msg: "User has been deleted." });
+  } catch (error) {
+    res.status(500).send({ msg: "Failed to delete user." });
+  }
+});
 
 module.exports = router;

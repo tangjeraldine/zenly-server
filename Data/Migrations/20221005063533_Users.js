@@ -28,7 +28,7 @@ exports.up = (knex, Promise) => {
       tbl.text("description").notNullable();
       tbl.enu("goods_type", ["Product", "Service"]).notNullable();
       tbl.float("price", 5, 2).notNullable();
-      tbl.timestamp("created_at").defaultTo(knex.fn.now());
+      tbl.timestamp("created_on").defaultTo(knex.fn.now());
     })
     .createTable("Cart", function (tbl) {
       tbl.primary(["id"]);
