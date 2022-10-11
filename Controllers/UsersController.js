@@ -127,8 +127,8 @@ router.post(
   validation(PurchasesValidation),
   async (req, res) => {
     const { User_id, checkedOutItems, grand_total, transaction_no } = req.body;
-    for (const eachItem of checkedOutItems) {
-      try {
+    try {
+      for (const eachItem of checkedOutItems) {
         const addToPurchase = await pool.query(
           `INSERT INTO "Purchases"("id", "Users_id", "Goods_id", purchase_price, quantity, transaction_no, grand_total) VALUES(nextval('purchase_id_seq'), $1, $2, $3, $4, $5, $6) RETURNING *`,
           [
@@ -144,10 +144,10 @@ router.post(
           `UPDATE "Cart" SET checked_out = true WHERE id = $1`,
           [eachItem.id]
         );
-        res.status(200).json(addToPurchase);
-      } catch (error) {
-        res.status(500).send(error);
       }
+      res.status(200).json({ msg: "Transaction completed." });
+    } catch (error) {
+      res.status(500).send(error);
     }
   }
 );
