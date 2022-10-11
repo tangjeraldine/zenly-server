@@ -144,8 +144,8 @@ router.post(
           `UPDATE "Cart" SET checked_out = true WHERE id = $1`,
           [eachItem.id]
         );
+        res.status(200).json({ msg: "Transaction completed." });
       }
-      res.status(200).json({ msg: "Transaction completed." });
     } catch (error) {
       res.status(500).send(error);
     }
