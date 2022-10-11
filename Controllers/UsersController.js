@@ -122,35 +122,31 @@ router.delete("/removecartitem/:id", async (req, res) => {
   }
 });
 
-router.post(
-  "/addtopurchases",
-  validation(PurchasesValidation),
-  async (req, res) => {
-    const { User_id, checkedOutItems, grand_total, transaction_no } = req.body;
-    try {
-      for (const eachItem of checkedOutItems) {
-        const addToPurchase = await pool.query(
-          `INSERT INTO "Purchases"("id", "Users_id", "Goods_id", purchase_price, quantity, transaction_no, grand_total) VALUES(nextval('purchase_id_seq'), $1, $2, $3, $4, $5, $6) RETURNING *`,
-          [
-            User_id,
-            eachItem.Goods_id,
-            eachItem.price,
-            eachItem.quantity,
-            transaction_no,
-            grand_total,
-          ]
-        );
-        const changeCartCheckOutStatus = await pool.query(
-          `UPDATE "Cart" SET checked_out = true WHERE id = $1`,
-          [eachItem.id]
-        );
-        res.status(200).json({ msg: "Transaction completed." });
-      }
-    } catch (error) {
-      res.status(500).send({ msg: "Cannot be updated" });
+router.post("/addtopurchases", async (req, res) => {
+  const { User_id, checkedOutItems, grand_total, transaction_no } = req.body;
+  try {
+    for (const eachItem of checkedOutItems) {
+      const addToPurchase = await pool.query(
+        `INSERT INTO "Purchases"("id", "Users_id", "Goods_id", purchase_price, quantity, transaction_no, grand_total) VALUES(nextval('purchase_id_seq'), $1, $2, $3, $4, $5, $6) RETURNING *`,
+        [
+          User_id,
+          eachItem.Goods_id,
+          eachItem.price,
+          eachItem.quantity,
+          transaction_no,
+          grand_total,
+        ]
+      );
+      const changeCartCheckOutStatus = await pool.query(
+        `UPDATE "Cart" SET checked_out = true WHERE id = $1`,
+        [eachItem.id]
+      );
     }
+    res.status(200).json({ msg: "Transaction completed." });
+  } catch (error) {
+    res.status(500).send({ msg: "Cannot be updated" });
   }
-);
+});
 
 router.get("/mypurchases/:id", async (req, res) => {
   const { id } = req.params;
