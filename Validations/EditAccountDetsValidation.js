@@ -1,16 +1,11 @@
-import * as yup from "yup";
-
+const yup = require("yup");
 
 const EditAccountDetsValidation = yup.object({
-  full_name: yup
-    .string()
-    .matches(/^[a-zA-Z\s]{4,30}$/, {
-      message: "Name should have 4-30 characters, and contain only alphabets.",
-      excludeEmptyString: true,
-    }),
-  email: yup
-    .string()
-    .email("Must be a valid email"),
+  full_name: yup.string().matches(/^[a-zA-Z\s]{4,30}$/, {
+    message: "Name should have 4-30 characters, and contain only alphabets.",
+    excludeEmptyString: true,
+  }),
+  email: yup.string().email("Must be a valid email"),
   password: yup
     .string()
     .matches(
@@ -21,27 +16,18 @@ const EditAccountDetsValidation = yup.object({
         excludeEmptyString: true,
       }
     ),
-  phone_no: yup
-    .string()
-    .matches(/^[0-9]{8,15}$/, {
-      message: "Phone number should be between 8-15 digits long.",
-      excludeEmptyString: true,
-    }),
-  birthdate: yup
-    .string()
-    .matches(
-      /^[0-9-()]+$/,
-      {
-        message: "Birthdate must be in the format DD-MM-YYYY.",
-        excludeEmptyString: true,
-      }
-    ),
-  gender: yup
-    .string()
-    .matches(/(Male|Female)/, {
-      message: "A gender is required.",
-      excludeEmptyString: true,
-    }),
+  phone_no: yup.string().matches(/^[0-9]{8,15}$/, {
+    message: "Phone number should be between 8-15 digits long.",
+    excludeEmptyString: true,
+  }),
+  birthdate: yup.string().matches(/^[0-9-()]+$/, {
+    message: "Birthdate must be in the format DD-MM-YYYY.",
+    excludeEmptyString: true,
+  }),
+  gender: yup.string().matches(/(Male|Female)/, {
+    message: "A gender is required.",
+    excludeEmptyString: true,
+  }),
 });
 
 export default EditAccountDetsValidation;
