@@ -96,14 +96,16 @@ router.post("/addtocart/", validation(CartValidation), async (req, res) => {
 
 router.put("/edititemquantity", async (req, res) => {
   const { quantity, User_id, Goods_id, cartItem_id } = req.body;
-  try {
+  if (quantity > 0 && quantity < 6) {
     const editItemQuantity = await pool.query(
       `UPDATE "Cart" SET quantity = $1 WHERE id = $2`,
       [quantity, cartItem_id]
     );
     res.status(200).json({ msg: "Item quantity changed." });
-  } catch (error) {
-    res.status(500).send(error);
+  } else {
+    res.status(500).send({
+      error: "Item quantity is not between 1 to 5. Quantity not updated.",
+    });
   }
 });
 
@@ -124,34 +126,28 @@ router.post(
   "/addtopurchases",
   validation(PurchasesValidation),
   async (req, res) => {
-    const {
-      Cart_id,
-      User_id,
-      Goods_id,
-      transaction_no,
-      purchase_price,
-      quantity,
-      grand_total,
-    } = req.body;
-    try {
-      const addToPurchase = await pool.query(
-        `INSERT INTO "Purchases"("id", "Users_id", "Goods_id", purchase_price, quantity, transaction_no, grand_total) VALUES(nextval('purchase_id_seq'), $1, $2, $3, $4, $5, $6) RETURNING *`,
-        [
-          User_id,
-          Goods_id,
-          purchase_price,
-          quantity,
-          transaction_no,
-          grand_total,
-        ]
-      );
-      const changeCartCheckOutStatus = await pool.query(
-        `UPDATE "Cart" SET checked_out = true WHERE id = $1`,
-        [Cart_id]
-      );
-      res.status(200).json(addToPurchase);
-    } catch (error) {
-      res.status(500).send(error);
+    const { User_id, checkedOutItems, grand_total, transaction_no } = req.body;
+    for (const eachItem of checkedOutItems) {
+      try {
+        const addToPurchase = await pool.query(
+          `INSERT INTO "Purchases"("id", "Users_id", "Goods_id", purchase_price, quantity, transaction_no, grand_total) VALUES(nextval('purchase_id_seq'), $1, $2, $3, $4, $5, $6) RETURNING *`,
+          [
+            User_id,
+            eachItem.Goods_id,
+            eachItem.price,
+            eachItem.quantity,
+            transaction_no,
+            grand_total,
+          ]
+        );
+        const changeCartCheckOutStatus = await pool.query(
+          `UPDATE "Cart" SET checked_out = true WHERE id = $1`,
+          [eachItem.id]
+        );
+        res.status(200).json(addToPurchase);
+      } catch (error) {
+        res.status(500).send(error);
+      }
     }
   }
 );
