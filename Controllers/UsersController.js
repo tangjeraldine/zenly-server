@@ -147,7 +147,7 @@ router.post(
         res.status(200).json({ msg: "Transaction completed." });
       }
     } catch (error) {
-      res.status(500).send(error);
+      res.status(500).send({ msg: "Cannot be updated" });
     }
   }
 );
