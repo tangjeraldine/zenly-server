@@ -30,4 +30,4 @@ const EditAccountDetsValidation = yup.object({
   }),
 });
 
-export default EditAccountDetsValidation;
+module.exports = EditAccountDetsValidation;
