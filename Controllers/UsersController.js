@@ -152,7 +152,7 @@ router.get("/mypurchases/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const getMyPurchases = await pool.query(
-      `SELECT * FROM "Purchases" WHERE "Users_id" = $1`,
+      `SELECT * FROM "Purchases" FULL JOIN "Goods" on "Purchases"."Goods_id" = "Goods"."id" WHERE "Purchases"."Users_id" = $1 ORDER BY "Purchases"."created_at" DESC;`,
       [id]
     );
     res.status(200).json(getMyPurchases.rows);
