@@ -80,10 +80,6 @@ router.get("/allcartitems/:id", async (req, res) => {
 router.post("/addtocart/", validation(CartValidation), async (req, res) => {
   const { quantity, User_id, Goods_id } = req.body;
   try {
-    const addToCart = await pool.query(
-      `INSERT INTO "Cart"("id", quantity, "Users_id", "Goods_id") VALUES(nextval('cart_id_seq'), $1, $2, $3) RETURNING *`,
-      [quantity, User_id, Goods_id]
-    );
     const findExistingItem = await pool.query(
       `SELECT * FROM "Cart" WHERE "id" = $1 AND "Goods_id" = $2 AND checked_out = false`,
       [User_id, Goods_id]
@@ -91,6 +87,10 @@ router.post("/addtocart/", validation(CartValidation), async (req, res) => {
     if (findExistingItem.length !== 0) {
       res.status(401).json({ msg: "Item already exists in cart" });
     } else {
+      const addToCart = await pool.query(
+        `INSERT INTO "Cart"("id", quantity, "Users_id", "Goods_id") VALUES(nextval('cart_id_seq'), $1, $2, $3) RETURNING *`,
+        [quantity, User_id, Goods_id]
+      );
       res.status(200).json({ msg: "Added to cart" });
     }
   } catch (error) {
@@ -124,25 +124,41 @@ router.delete("/removecartitem/:id", async (req, res) => {
   }
 });
 
-router.post("/purchases", validation(PurchasesValidation), async (req, res) => {
-  const {
-    User_id,
-    Goods_id,
-    transaction_no,
-    purchase_price,
-    quantity,
-    grand_total,
-  } = req.body;
-  try {
-    const addToPurchase = await pool.query(
-      `INSERT INTO "Purchases"("id", "Users_id", "Goods_id", purchase_price, quantity, transaction_no, grand_total) VALUES(nextval('purchase_id_seq'), $1, $2, $3, $4, $5, $6) RETURNING *`,
-      [User_id, Goods_id, purchase_price, quantity, transaction_no, grand_total]
-    );
-    res.status(200).json(addToPurchase);
-  } catch (error) {
-    res.status(500).send(error);
+router.post(
+  "/addtopurchases",
+  validation(PurchasesValidation),
+  async (req, res) => {
+    const {
+      Cart_id,
+      User_id,
+      Goods_id,
+      transaction_no,
+      purchase_price,
+      quantity,
+      grand_total,
+    } = req.body;
+    try {
+      const addToPurchase = await pool.query(
+        `INSERT INTO "Purchases"("id", "Users_id", "Goods_id", purchase_price, quantity, transaction_no, grand_total) VALUES(nextval('purchase_id_seq'), $1, $2, $3, $4, $5, $6) RETURNING *`,
+        [
+          User_id,
+          Goods_id,
+          purchase_price,
+          quantity,
+          transaction_no,
+          grand_total,
+        ]
+      );
+      const changeCartCheckOutStatus = await pool.query(
+        `UPDATE "Cart" SET checked_out = true WHERE id = $1`,
+        [Cart_id]
+      );
+      res.status(200).json(addToPurchase);
+    } catch (error) {
+      res.status(500).send(error);
+    }
   }
-});
+);
 
 router.get("/mypurchases/:id", async (req, res) => {
   const { id } = req.params;
