@@ -80,7 +80,7 @@ router.get("/allcartitems/:id", async (req, res) => {
 router.post("/addtocart/", validation(CartValidation), async (req, res) => {
   const { quantity, User_id, Goods_id } = req.body;
   const findExistingItem = await pool.query(
-    `SELECT * FROM "Cart" WHERE "id" = $1 AND "Goods_id" = $2 AND checked_out = false`,
+    `SELECT * FROM "Cart" WHERE "Users_id" = $1 AND "Goods_id" = $2 AND checked_out = false`,
     [User_id, Goods_id]
   );
   if (findExistingItem.rows.length !== 0) {
