@@ -146,10 +146,13 @@ router.delete("/deletegoods/:id", async (req, res) => {
 });
 
 //router to view all users
-router.get("/viewuserslist/", async (req, res) => {
+router.get("/viewuserslist/:data", async (req, res) => {
+  const data = req.params;
   try {
-    const viewAllUsers = await pool.query(`SELECT * FROM "Users" `);
-    res.status(200).send(viewAllUsers.rows);
+    const viewThisUser = await pool.query(
+      `SELECT * FROM "Users" WHERE (full_name) LIKE %$1%`
+    );
+    res.status(200).send(viewThisUser.rows);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -182,5 +185,7 @@ router.put("/suspenduser/:id", async (req, res) => {
     res.status(500).send({ msg: "Item not deleted" });
   }
 });
+
+// router to obtain this user by name
 
 module.exports = router;
