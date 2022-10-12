@@ -150,8 +150,8 @@ router.delete("/deletegoods/:id", async (req, res) => {
 });
 
 //router to view all users
-router.get("/viewuserslist/:data", async (req, res) => {
-  const data = req.params;
+router.post("/viewuserslist/", async (req, res) => {
+  const data = req.body;
   try {
     const viewThisUser = await pool.query(
       `SELECT * FROM "Users" WHERE full_name = $1`,
