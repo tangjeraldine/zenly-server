@@ -93,7 +93,7 @@ router.put(
         `UPDATE "Users" SET full_name = $1, email = $2, phone_no = $3, birthdate = $4, gender = $5 WHERE id = $6 RETURNING *`,
         [full_name, email, phone_no, birthdate, gender, id]
       );
-      res.status(200).json(editAllButPw);
+      res.status(200).json(editAllButPw.rows);
     } else {
       const hash = bcrypt.hashSync(password, 10);
       const editAllDets = await pool.query(
