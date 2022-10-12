@@ -63,13 +63,16 @@ router.get("/viewthisbuyer/:id", async (req, res) => {
   }
 });
 
+//router to filter and see only certain purchases
+
 //router to edit the order status via Purchases table id
 router.put("/editorderstatus", async (req, res) => {
-  const { order_status, transaction_no, Goods_id, Users_id } = req.body;
+  const { order_status, transaction_no, Goods_id, Users_id, created_at } =
+    req.body;
   try {
     const changeOrderStatus = await pool.query(
-      `UPDATE "Purchases" SET order_status = $1 WHERE transaction_no = $2 AND "Goods_id" = $3 AND "Users_id" = $4 RETURNING *`,
-      [order_status, transaction_no, Goods_id, Users_id]
+      `UPDATE "Purchases" SET order_status = $1 WHERE transaction_no = $2 AND "Goods_id" = $3 AND "Users_id" = $4 AND created_at = $5 RETURNING *`,
+      [order_status, transaction_no, Goods_id, Users_id, created_at]
     );
     res.status(200).send(changeOrderStatus.rows[0]);
   } catch (error) {
@@ -77,9 +80,29 @@ router.put("/editorderstatus", async (req, res) => {
   }
 });
 
-//router to add items from Goods table
+//router to new items to Goods table
+router.post("/addnewgoods/", validation(CartValidation), async (req, res) => {
+  try {
+    const addNewGood = await pool.query(
+      `SELECT * FROM "Goods" WHERE goods_type = 'Service'`
+    );
+    res.status(200).json(addNewGood.rows);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
 
 //router to delete items from Goods table
+router.delete("/deletegoods/", validation(CartValidation), async (req, res) => {
+  try {
+    const addNewGood = await pool.query(
+      `SELECT * FROM "Goods" WHERE goods_type = 'Service'`
+    );
+    res.status(200).json(addNewGood.rows);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
 
 //router to delete users from Users table
 
