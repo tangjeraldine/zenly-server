@@ -124,7 +124,8 @@ router.post("/addnewgoods/", validation(GoodsValidation), async (req, res) => {
       `INSERT INTO "Goods" ("id", title, image_url, description, goods_type, price) VALUES(nextval('goods_id_seq'), $1, $2, $3, $4, $5)RETURNING *`,
       [title, image_url, description, goods_type, price]
     );
-    res.status(200).json(addNewGood.rows);
+    const seeAllGoods = await pool.query(`SELECT * FROM "Goods"`);
+    res.status(200).json(seeAllGoods);
   } catch (error) {
     res.status(500).send(error);
   }
