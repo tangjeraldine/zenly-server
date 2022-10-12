@@ -150,7 +150,7 @@ router.delete("/deletegoods/:id", async (req, res) => {
 });
 
 //router to view all users
-router.get("/viewuserslist/", async (req, res) => {
+router.post("/viewuserslist/", async (req, res) => {
   const data = req.body;
   try {
     const viewThisUser = await pool.query(
