@@ -102,7 +102,7 @@ router.post("/addtocart/", validation(CartValidation), async (req, res) => {
     [User_id, Goods_id]
   );
   if (findExistingItem.rows.length !== 0) {
-    res.status(401).json(findExistingItem.rows);
+    res.status(401).json({ msg: "There is an existing item in the cart." });
   } else {
     const addToCart = await pool.query(
       `INSERT INTO "Cart"("id", quantity, "Users_id", "Goods_id") VALUES(nextval('cart_id_seq'), $1, $2, $3) RETURNING *`,
