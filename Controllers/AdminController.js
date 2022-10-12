@@ -2,9 +2,7 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const RegisterValidation = require("../Validations/RegisterValidation");
-const LoginValidation = require("../Validations/LoginValidation");
-const EditAccountDetsValidation = require("../Validations/EditAccountDetsValidation");
+const GoodsValidation = require("../Validations/GoodsValidation");
 //* Connecting Database using pg
 const Pool = require("pg").Pool;
 const connectionString = process.env.DB_URL;
@@ -81,10 +79,12 @@ router.put("/editorderstatus", async (req, res) => {
 });
 
 //router to new items to Goods table
-router.post("/addnewgoods/", validation(CartValidation), async (req, res) => {
+router.post("/addnewgoods/", validation(GoodsValidation), async (req, res) => {
+  const { title, image_url, description, goods_type, price } = req.body;
   try {
     const addNewGood = await pool.query(
-      `SELECT * FROM "Goods" WHERE goods_type = 'Service'`
+      `INSERT INTO "Goods" ("id", title, image_url, description, goods_type, price) VALUES(nextval('goods_id_seq'), $1, $2, $3, $4, $5)RETURNING *`,
+      [title, image_url, description, goods_type, price]
     );
     res.status(200).json(addNewGood.rows);
   } catch (error) {
@@ -93,19 +93,55 @@ router.post("/addnewgoods/", validation(CartValidation), async (req, res) => {
 });
 
 //router to delete items from Goods table
-router.delete("/deletegoods/", validation(CartValidation), async (req, res) => {
+router.delete("/deletegoods/:id", async (req, res) => {
+  const { id } = req.params;
   try {
-    const addNewGood = await pool.query(
-      `SELECT * FROM "Goods" WHERE goods_type = 'Service'`
+    const deleteThisGood = await pool.query(
+      `DELETE FROM "Goods" WHERE "id" = $1`,
+      [id]
     );
-    res.status(200).json(addNewGood.rows);
+    res.status(200).json({ msg: "This item has been deleted." });
+  } catch (error) {
+    res.status(500).send({ msg: "Item not deleted" });
+  }
+});
+
+//router to view all users
+router.get("/viewuserslist/", async (req, res) => {
+  try {
+    const viewAllUsers = await pool.query(`SELECT * FROM "Users" `);
+    res.status(200).send(viewAllUsers.rows);
   } catch (error) {
     res.status(500).send(error);
   }
 });
 
 //router to delete users from Users table
+router.delete("/deleteuser/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const deleteThisUser = await pool.query(
+      `DELETE FROM "Users" WHERE "id" = $1`,
+      [id]
+    );
+    res.status(200).json({ msg: "This user has been deleted." });
+  } catch (error) {
+    res.status(500).send({ msg: "User could not be deleted" });
+  }
+});
 
 //router to suspend users? --> create new page to inform user they have been suspended
+router.put("/suspenduser/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const changeSecurityLvl = await pool.query(
+      `UPDATE "Users" SET security_lvl = '9' WHERE id = $1 RETURNING *`,
+      [id]
+    );
+    res.status(200).json(changeSecurityLvl);
+  } catch (error) {
+    res.status(500).send({ msg: "Item not deleted" });
+  }
+});
 
 module.exports = router;
