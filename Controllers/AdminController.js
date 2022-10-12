@@ -41,9 +41,23 @@ router.get("/allpendingorders", async (req, res) => {
 router.get("/displayallorders", async (req, res) => {
   try {
     const displayAllOrders = await pool.query(
-      `SELECT * FROM "Purchases" FULL JOIN "Goods" on "Purchases"."Goods_id" = "Goods"."id" ORDER BY created_at DESC, transaction_no ASC;`
+      `SELECT * FROM "Purchases" FULL JOIN "Goods" on "Purchases"."Goods_id" = "Goods"."id" ORDER BY created_at DESC, transaction_no ASC`
     );
     res.status(200).send(displayAllOrders.rows);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+//router to get the buyer details for that purchase
+router.get("/viewthisbuyer/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const viewThisBuyer = await pool.query(
+      `SELECT * FROM "Users" WHERE "id" = $1`,
+      [id]
+    );
+    res.status(200).send(viewThisBuyer.rows[0]);
   } catch (error) {
     res.status(500).send(error);
   }
