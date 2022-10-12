@@ -63,4 +63,26 @@ router.get("/viewthisbuyer/:id", async (req, res) => {
   }
 });
 
+//router to edit the order status via Purchases table id
+router.put("/editorderstatus", async (req, res) => {
+  const { order_status, transaction_no, Goods_id, Users_id } = req.body;
+  try {
+    const changeOrderStatus = await pool.query(
+      `UPDATE "Purchases" SET order_status = $1 WHERE transaction_no = $2 AND "Goods_id" = $3 AND "Users_id" = $4 RETURNING *`,
+      [order_status, transaction_no, Goods_id, Users_id]
+    );
+    res.status(200).send(changeOrderStatus.rows[0]);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+//router to add items from Goods table
+
+//router to delete items from Goods table
+
+//router to delete users from Users table
+
+//router to suspend users? --> create new page to inform user they have been suspended
+
 module.exports = router;
