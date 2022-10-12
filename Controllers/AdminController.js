@@ -154,7 +154,7 @@ router.post("/viewuserslist/", async (req, res) => {
   const data = req.body;
   try {
     const viewThisUser = await pool.query(
-      `SELECT * FROM "Users" WHERE (full_name) LIKE $1`,
+      `SELECT * FROM "Users" WHERE full_name = $1`,
       [data]
     );
     res.status(200).json(viewThisUser);
