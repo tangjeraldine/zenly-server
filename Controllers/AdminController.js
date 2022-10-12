@@ -154,7 +154,7 @@ router.post("/viewuserslist/", async (req, res) => {
   const data = req.body;
   try {
     const viewThisUser = await pool.query(
-      `SELECT * FROM "Users" WHERE full_name = $1`,
+      `SELECT * FROM "Users" WHERE (full_name) LIKE $1`,
       [data]
     );
     res.status(200).send(viewThisUser.rows);
@@ -178,12 +178,13 @@ router.delete("/deleteuser/:id", async (req, res) => {
 });
 
 //router to suspend users? --> create new page to inform user they have been suspended
-router.put("/suspenduser/:id", async (req, res) => {
+router.put("/changeuserstatus/:id", async (req, res) => {
   const { id } = req.params;
+  const { thisStatus } = req.body;
   try {
     const changeSecurityLvl = await pool.query(
-      `UPDATE "Users" SET security_lvl = '9' WHERE id = $1 RETURNING *`,
-      [id]
+      `UPDATE "Users" SET security_lvl = $1 WHERE id = $2 RETURNING *`,
+      [thisStatus, id]
     );
     res.status(200).json(changeSecurityLvl);
   } catch (error) {
