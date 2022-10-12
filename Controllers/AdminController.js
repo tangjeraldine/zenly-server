@@ -78,6 +78,44 @@ router.put("/editorderstatus", async (req, res) => {
   }
 });
 
+//router to view all goods
+router.get("/viewgoodslist/", async (req, res) => {
+  try {
+    const viewAllGoods = await pool.query(`SELECT * FROM "Goods" `);
+    res.status(200).send(viewAllGoods.rows);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+//router to view that particular good in Modal
+router.get("/viewgoodslist/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const viewThisGoods = await pool.query(
+      `SELECT * FROM "Goods" WHERE "id"=$1 `,
+      [id]
+    );
+    res.status(200).send(viewThisGoods.rows[0]);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+//router to edit Goods items
+router.put("/editgoodsdetails/", async (req, res) => {
+  const { title, image_url, description, goods_type, price, id } = req.body;
+  try {
+    const editGoodsDetails = await pool.query(
+      `UPDATE "Purchases" SET title = $1, image_url=$2, description = $3, goods_type=$4, price=$5 WHERE "id" = $6 RETURNING *`,
+      [title, image_url, description, goods_type, price, id]
+    );
+    res.status(200).json(editGoodsDetails);
+  } catch (error) {
+    res.status(500).send({ msg: "Failed to edit goods details." });
+  }
+});
+
 //router to new items to Goods table
 router.post("/addnewgoods/", validation(GoodsValidation), async (req, res) => {
   const { title, image_url, description, goods_type, price } = req.body;
