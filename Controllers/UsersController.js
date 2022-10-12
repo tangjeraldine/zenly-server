@@ -42,6 +42,7 @@ router.get("/current/:id", async (req, res) => {
   }
 });
 
+//router for common page
 router.get("/allproducts", async (req, res) => {
   try {
     const allProducts = await pool.query(
@@ -53,6 +54,7 @@ router.get("/allproducts", async (req, res) => {
   }
 });
 
+//router for common page
 router.get("/allservices", async (req, res) => {
   try {
     const allServices = await pool.query(
@@ -64,6 +66,21 @@ router.get("/allservices", async (req, res) => {
   }
 });
 
+//router to get the details for just 1 good, to open up modal
+router.get("/viewthisgood/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const viewThisGood = await pool.query(
+      `SELECT * FROM "Goods" WHERE "id" = $1`,
+      [id]
+    );
+    res.status(200).json(viewThisGood.rows[0]);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+//router for all cart items for that particular user
 router.get("/allcartitems/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -77,6 +94,7 @@ router.get("/allcartitems/:id", async (req, res) => {
   }
 });
 
+//router for adding item to that user's cart
 router.post("/addtocart/", validation(CartValidation), async (req, res) => {
   const { quantity, User_id, Goods_id } = req.body;
   const findExistingItem = await pool.query(
