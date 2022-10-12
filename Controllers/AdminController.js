@@ -157,7 +157,7 @@ router.post("/viewuserslist/", async (req, res) => {
       `SELECT * FROM "Users" WHERE (full_name) LIKE $1`,
       [data]
     );
-    res.status(200).json({ msg: "Found you!" });
+    res.status(200).json(viewThisUser);
   } catch (error) {
     res.status(500).send(error);
   }
